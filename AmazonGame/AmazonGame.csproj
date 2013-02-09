@@ -8,9 +8,12 @@
     <ProjectGuid>{84CFAABB-E4FA-43EE-9449-265A9F19F014}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>AmazonGame</RootNamespace>
-    <AssemblyName>AmazonGame</AssemblyName>
+    <AssemblyName>AmazonGame.exe</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <StartupObject>AmazonGame.Amazon</StartupObject>
+    <ReleaseVersion>0.2</ReleaseVersion>
+    <Description>This project contains a sample application for SimpleAI.
+The game is called 'Game of the Amazons' and is implemented as a console application.</Description>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +23,7 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

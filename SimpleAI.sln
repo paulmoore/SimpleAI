@@ -21,6 +21,45 @@ Global
 		{C8EF723E-6745-4E36-9442-FD57E74BA541}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = SimpleAI\SimpleAI.csproj
+		StartupItems = $0
+		$0.Item = SimpleAI\SimpleAI.csproj
+		$0.Item = AmazonGame\AmazonGame.csproj
+		Policies = $1
+		$1.DotNetNamingPolicy = $2
+		$2.DirectoryNamespaceAssociation = None
+		$2.ResourceNamePolicy = FileFormatDefault
+		$1.TextStylePolicy = $3
+		$3.inheritsSet = null
+		$3.scope = text/x-csharp
+		$1.CSharpFormattingPolicy = $4
+		$4.IndentSwitchBody = True
+		$4.PropertyBraceStyle = NextLine
+		$4.PropertyGetBraceStyle = NextLine
+		$4.PropertySetBraceStyle = NextLine
+		$4.EventBraceStyle = NextLine
+		$4.EventAddBraceStyle = NextLine
+		$4.EventRemoveBraceStyle = NextLine
+		$4.StatementBraceStyle = NextLine
+		$4.inheritsSet = Mono
+		$4.inheritsScope = text/x-csharp
+		$4.scope = text/x-csharp
+		$1.TextStylePolicy = $5
+		$5.FileWidth = 120
+		$5.TabWidth = 4
+		$5.inheritsSet = Mono
+		$5.inheritsScope = text/plain
+		$5.scope = text/plain
+		$1.StandardHeader = $6
+		$6.Text = 
+		$6.IncludeInNewFiles = True
+		$1.VersionControlPolicy = $7
+		$7.inheritsSet = Mono
+		$1.ChangeLogPolicy = $8
+		$8.UpdateMode = None
+		$8.MessageStyle = $9
+		$9.LineAlign = 0
+		$8.inheritsSet = Mono
+		description = @This solution contains the SimpleAI framework, unit tests, and a sample application for 'Game of the Amazons'.\nSimpleAI is a small framework for building AI for turn based games.\nCurrently it supports minimax searching.
+		version = 0.2
 	EndGlobalSection
 EndGlobal

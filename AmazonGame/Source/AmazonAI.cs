@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
+using System.Text;
 using SimpleAI.Framework;
 	
 namespace AmazonGame
 {
-	public enum AmazonCell : byte
+	internal enum AmazonCell : byte
 	{
 		FREE,
 		WHITE_QUEEN,
@@ -12,29 +13,32 @@ namespace AmazonGame
 		ARROW
 	}
 	
-	public enum AmazonPlayer : byte
+	internal enum AmazonPlayer : byte
 	{
 		WHITE,
 		BLACK
 	}
 	
-	public struct AmazonAction
+	internal struct AmazonAction
 	{
 		public AmazonPlayer role;
 		
 		public int v;
 		
+		// queen initial row, column
 		public sbyte qr, qc;
+		// queen final row, column
 		public sbyte qfr, qfc;
+		// queen arrow row, column
 		public sbyte ar, ac;
 		
 		public override string ToString ()
 		{
-			return string.Format("[AmazonAction qr:{0}, qc:{1}, qfr:{2}, qfc:{3}, ar:{4}, ac:{5}, v:{6}, role:{7}]", qr, qc, qfr, qfc, ar, ac, v, role);
+			return string.Format("[AmazonAction] qr:{0}, qc:{1}, qfr:{2}, qfc:{3}, ar:{4}, ac:{5}, v:{6}, role:{7}", qr, qc, qfr, qfc, ar, ac, v, role);
 		}
 	}
 	
-	public sealed class AmazonBuilder : ActionBuilder<AmazonAction, int>
+	internal sealed class AmazonBuilder : ActionBuilder<AmazonAction, int>
 	{
 		public int PosInf
 		{
@@ -72,7 +76,7 @@ namespace AmazonGame
 		}
 	}
 	
-	public sealed class AmazonState : State<AmazonAction>, MutableClone<AmazonState>
+	internal sealed class AmazonState : State<AmazonAction>, MutableClone<AmazonState>
 	{
 		public const sbyte NUM_ROWS = 10;
 		public const sbyte NUM_COLS = 10;
@@ -133,6 +137,11 @@ namespace AmazonGame
 			return board[row, col] == AmazonCell.FREE;
 		}
 		
+		public bool QueenAt (AmazonPlayer player, int row, int col)
+		{
+			return board[row, col] == (player == AmazonPlayer.WHITE ? AmazonCell.WHITE_QUEEN : AmazonCell.BLACK_QUEEN);
+		}
+		
 		public void ApplyAction (AmazonAction action)
 		{
 			sbyte[,] queens;
@@ -144,7 +153,8 @@ namespace AmazonGame
 				queens = blackQueens;
 				marker = AmazonCell.BLACK_QUEEN;
 			}
-			for (int i = 0; i < NUM_ROWS; i++) {
+			for (int i = 0; i < queens.GetLength(0); i++) {
+				// find the correct queen, and move it
 				if (queens[i, 0] == action.qr && queens[i, 1] == action.qc) {
 					queens[i, 0] = action.qfr;
 					queens[i, 1] = action.qfc;
@@ -153,6 +163,7 @@ namespace AmazonGame
 			}
 			board[action.qr, action.qc] = AmazonCell.FREE;
 			board[action.qfr, action.qfc] = marker;
+			// this has to be done last, since the queen can fire back on herself
 			board[action.ar, action.ac] = AmazonCell.ARROW;
 		}
 		
@@ -167,7 +178,7 @@ namespace AmazonGame
 				queens = blackQueens;
 				marker = AmazonCell.BLACK_QUEEN;
 			}
-			for (int i = 0; i < NUM_ROWS; i++) {
+			for (int i = 0; i < queens.GetLength(0); i++) {
 				if (queens[i, 0] == action.qfr && queens[i, 1] == action.qfc) {
 					queens[i, 0] = action.qr;
 					queens[i, 1] = action.qc;
@@ -187,9 +198,60 @@ namespace AmazonGame
 			Array.Copy(blackQueens, clone.blackQueens, blackQueens.Length);
 			return clone;
 		}
+		
+		public override string ToString ()
+		{
+			// prints out a human readable representation of the board
+			StringBuilder sb = new StringBuilder();
+			sb.Append("  +");
+			for (int j = 0; j < board.GetLength(1) * 2 - 1; j++) {
+				sb.Append("-");
+			}
+			sb.Append("+");
+			sb.AppendLine();
+			for (int i = board.GetLength(0) - 1; i >= 0; i--) {
+				if (i + 1 < 10) {
+					sb.Append(i + 1);
+					sb.Append(" ");
+				} else {
+					sb.Append(i + 1);
+				}
+				sb.Append("|");
+				for (int j = 0; j < board.GetLength(1); j++) {
+					switch (board[i, j]) {
+						case AmazonCell.WHITE_QUEEN:
+							sb.Append("W");
+							break;
+						case AmazonCell.BLACK_QUEEN:
+							sb.Append("B");
+							break;
+						case AmazonCell.ARROW:
+							sb.Append("A");
+							break;
+						case AmazonCell.FREE:
+							sb.Append(" ");
+							break;
+					}
+					sb.Append("|");
+				}
+				sb.AppendLine();
+			}
+			sb.Append("  +");
+			for (int j = 0; j < board.GetLength(1) * 2 - 1; j++) {
+				sb.Append("-");
+			}
+			sb.Append("+");
+			sb.AppendLine();
+			sb.Append("   ");
+			for (int j = 0; j < board.GetLength(1); j++) {
+				sb.Append((char)('a' + j));
+				sb.Append(" ");
+			}
+			return sb.ToString();
+		}
 	}
 	
-	public sealed class AmazonCutoffTest : CutoffTest<AmazonState, AmazonAction>
+	internal sealed class AmazonCutoffTest : CutoffTest<AmazonState, AmazonAction>
 	{
 		private readonly int maxSearchTime;
 		
@@ -213,14 +275,16 @@ namespace AmazonGame
 		
 		public bool Test (AmazonState state)
 		{
+			// really all we are concerned about is time, we don't have to worry about memory since it is mostly allocated up front
 			return Environment.TickCount - startTime > maxSearchTime;
 		}
 	}
 	
-	public sealed class AmazonSuccessorFunction : SuccessorFunction<AmazonState, AmazonAction, byte, AmazonPlayer>
+	internal sealed class AmazonSuccessorFunction : SuccessorFunction<AmazonState, AmazonAction, byte, AmazonPlayer>
 	{
 		public void Partition (AmazonState state, AmazonPlayer player, Action<byte> partitioner)
 		{
+			// partitioning in this case is simple, each queen is one partition
 			partitioner(0);
 			partitioner(1);
 			partitioner(2);
@@ -229,6 +293,7 @@ namespace AmazonGame
 		
 		public void Expand (AmazonState state, AmazonPlayer player, byte partition, Func<AmazonAction, bool> expander)
 		{
+			// take our queen, and find all possible moves she can make
 			sbyte[,] queens = state.GetQueens(player);
 			sbyte[,] dirs = AmazonState.dirs;
 			for (int i = 0; i < dirs.GetLength(0); i++) {
@@ -276,7 +341,18 @@ namespace AmazonGame
 		}
 	}
 	
-	public sealed class AmazonEvaluationFunction : EvaluationFunction<AmazonState, AmazonAction, int, AmazonPlayer>
+	/// <summary>
+	/// An Amazon evaluation function which values territory.
+	/// </summary>
+	/// <remarks>
+	/// In this evaluation function, territory is measured by how much more easily we can 'hop' to a square as opposed to our enemy.
+	/// The break down is as follows:
+	/// * If we can get to a square in at most one hop, and the enemy cannot reach the square in at most two hops, we get 3 points.
+	/// * If we can get to a square in at most one hop, and the enemy cannot reach the square in at most one hop, we get 2 points.
+	/// * If we can get to a square in at most two hops, and the enemy cannot reach the square in at most two hops, we get 1 point.
+	/// The same score for the enemy is negated from our score.
+	/// </remarks>
+	internal sealed class AmazonEvaluationFunction : EvaluationFunction<AmazonState, AmazonAction, int, AmazonPlayer>
 	{
 		private readonly BitArray ourOneHop, ourTwoHop, oppOneHop, oppTwoHop;
 		
@@ -297,12 +373,21 @@ namespace AmazonGame
 			CalculateHops(state, player == AmazonPlayer.WHITE ? AmazonPlayer.BLACK : AmazonPlayer.WHITE);
 			int evaluation = 0;
 			for (int i = 0; i < AmazonState.NUM_ROWS * AmazonState.NUM_COLS; i++) {
+				// calculate our score based on the owned territory
 				if (ourOneHop[i] && !oppTwoHop[i]) {
 					evaluation += 3;
 				} else if (ourOneHop[i] && !oppOneHop[i]) {
 					evaluation += 2;
 				} else if (ourTwoHop[i] && !oppTwoHop[i]) {
 					evaluation += 1;
+				}
+				// do the same evaluation for the enemy, but negate it from our score
+				if (oppOneHop[i] && !ourTwoHop[i]) {
+					evaluation -= 4;
+				} else if (oppOneHop[i] && !ourOneHop[i]) {
+					evaluation -= 2;
+				} else if (oppTwoHop[i] && !ourTwoHop[i]) {
+					evaluation -= 1;
 				}
 			}
 			this.player = default(AmazonPlayer);
@@ -356,6 +441,76 @@ namespace AmazonGame
 			clone.oppTwoHop.Or(oppTwoHop);
 			clone.player = player;
 			return clone;
+		}
+	}
+	
+	internal sealed class AmazonMoveValidator
+	{
+		public static string Validate (AmazonState state, AmazonAction move)
+		{
+			// check the opponent has a queen at the starting position
+			if (state.QueenAt(move.role, move.qr, move.qc)) {
+				// validate the queen's dr
+				sbyte dr, dc;
+				if (move.qfr < move.qr) {
+					dr = -1;
+				} else if (move.qfr > move.qr) {
+					dr = 1;
+				} else {
+					dr = 0;
+				}
+				// validate the queen's dc
+				if (move.qfc < move.qc) {
+					dc = -1;
+				} else if (move.qfc > move.qc) {
+					dc = 1;
+				} else {
+					dc = 0;
+				}
+				// walk to the queen's final position
+				if (dr != 0 || dc != 0) {
+					sbyte qr = (sbyte)(move.qr + dr), qc = (sbyte)(move.qc + dc);
+					while (state.InBounds(qr, qc) && state.IsFree(qr, qc)) {
+						if (qr == move.qfr && qc == move.qfc) {
+							// validate the arrow's dr
+							if (move.ar < move.qfr) {
+								dr = -1;
+							} else if (move.ar > move.qfr) {
+								dr = 1;
+							} else {
+								dr = 0;
+							}
+							// validate the arrow's dc
+							if (move.ac < move.qfc) {
+								dc = -1;
+							} else if (move.ac > move.qfc) {
+								dc = 1;
+							} else {
+								dc = 0;
+							}
+							if (dr != 0 || dc != 0) {
+								// walk to the arrow's final position
+								sbyte ar = (sbyte)(move.qfr + dr), ac = (sbyte)(move.qfc + dc);
+								while (state.InBounds(ar, ac) && (state.IsFree(ar, ac) || (ar == move.qr && ac == move.qc))) {
+									if (ar == move.ar && ac == move.ac) {
+										// all conditions are met
+										return null;
+									}
+									ar += dr;
+									ac += dc;
+								}
+								return "The arrow's path is not clear!";
+							}
+							return "Invalid arrow direction!";
+						}
+						qr += dr;
+						qc += dc;
+					}
+					return "The queen's path is not clear!";
+				}
+				return "Invalid queen direction!";
+			}
+			return "No queen found at starting location!";
 		}
 	}
 }

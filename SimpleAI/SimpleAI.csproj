@@ -10,6 +10,10 @@
     <RootNamespace>SimpleAI.Framework</RootNamespace>
     <AssemblyName>SimpleAI.Framework</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ReleaseVersion>0.2</ReleaseVersion>
+    <Description>This project contains the SimpleAI framework and unit tests.
+SimpleAI is a small framework for building AI for turn based games.
+Currently it supports minimax searching.</Description>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
