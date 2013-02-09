@@ -1,3 +1,5 @@
+// http://paulmoore.mit-license.org
+
 namespace SimpleAI.Framework
 {
 	/// <summary>

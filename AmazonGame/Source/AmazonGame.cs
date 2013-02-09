@@ -1,3 +1,5 @@
+// http://paulmoore.mit-license.org
+
 using System;
 using SimpleAI.Framework;
 
